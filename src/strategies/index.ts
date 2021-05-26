@@ -50,6 +50,7 @@ import { strategy as work } from './work';
 import { strategy as ticketValidity } from './ticket-validity';
 import { strategy as opium } from './opium';
 import { strategy as ocean } from './ocean-marketplace';
+import { strategy as oceanDollar } from './ocean-odollar';
 import { strategy as theGraphBalance } from './the-graph-balance';
 import { strategy as theGraphDelegation } from './the-graph-delegation';
 import { strategy as theGraphIndexing } from './the-graph-indexing';
@@ -147,6 +148,7 @@ export default {
   'ticket-validity': ticketValidity,
   opium,
   'ocean-marketplace': ocean,
+  'ocean-odollar': oceanDollar,
   'the-graph-balance': theGraphBalance,
   'the-graph-delegation': theGraphDelegation,
   'the-graph-indexing': theGraphIndexing,
