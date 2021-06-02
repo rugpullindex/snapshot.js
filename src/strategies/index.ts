@@ -51,6 +51,7 @@ import { strategy as ticketValidity } from './ticket-validity';
 import { strategy as opium } from './opium';
 import { strategy as ocean } from './ocean-marketplace';
 import { strategy as oceanDollar } from './ocean-odollar';
+import { strategy as oceanUniswap } from './ocean-uniswap';
 import { strategy as theGraphBalance } from './the-graph-balance';
 import { strategy as theGraphDelegation } from './the-graph-delegation';
 import { strategy as theGraphIndexing } from './the-graph-indexing';
@@ -149,6 +150,7 @@ export default {
   opium,
   'ocean-marketplace': ocean,
   'ocean-odollar': oceanDollar,
+  'ocean-uniswap': oceanUniswap,
   'the-graph-balance': theGraphBalance,
   'the-graph-delegation': theGraphDelegation,
   'the-graph-indexing': theGraphIndexing,

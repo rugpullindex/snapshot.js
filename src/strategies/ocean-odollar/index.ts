@@ -43,7 +43,6 @@ export async function strategy(
   options,
   snapshot
 ) {
-  console.log("Hi");
   const params = {
     financialContracts:    
       {
@@ -52,6 +51,7 @@ export async function strategy(
             id: "0x312ecf2854f73a3ff616e3cdbc05e2ff6a98d1f0"
           }
         },
+        cumulativeFeeMultiplier: true,
         positions: {
           id: true,
           contract: {
@@ -62,11 +62,13 @@ export async function strategy(
             positions: {
               id: true,
               collateral: true,
-              rawCollateral: true
+              rawCollateral: true,
+              isEnded: true
             },
             liquidations: {
               id: true,
-              lockedCollateral: true
+              lockedCollateral: true,
+              amountWithdrawn: true
             },
           },
           collateralToken: {
@@ -76,9 +78,7 @@ export async function strategy(
         }
       }
   };
-  console.log("Hi");
 
-  // Retrieve the top 1000 pools
   const graphResults = await subgraphRequest(
     UMA_SUBGRAPH_URL[network],
     params
@@ -86,49 +86,41 @@ export async function strategy(
 
   console.log(graphResults);
   var ocean_locked = 0;
-  var ocean_liquidated = 0;
+  const score = {};
+  const userAddresses: string[] = [];
+
+  console.log(graphResults.financialContracts.cumulativeFeeMultiplier);
+
   graphResults.financialContracts.forEach((contract) => {
     contract.positions.map((position) => {
       position.sponsor.positions.map((pos) => {
-        console.log(pos);
-        ocean_locked += +pos.collateral;
+        if(!pos.isEnded) {
+          console.log(pos);
+          var userAddress = pos.id.split('-')[0];
+          console.log(userAddress);
+          userAddress = userAddress.toLowerCase();
+          console.log(userAddress);
+          userAddresses.push(userAddress);
+          if (!score[userAddress]) {
+            score[userAddress] = BigNumber.from(0);
+          }
+          score[userAddress] = pos.Collateral;
+          ocean_locked += +pos.rawCollateral;
+
+        }
       })
       position.sponsor.liquidations.map((liq) => {
-        console.log(liq);
-        ocean_liquidated += +liq.lockedCollateral;
+        //console.log(liq);
       })
     })
   })
 
   console.log("sum ocean locked");
   console.log(ocean_locked);
-  console.log("sum ocean liquidated");
-  console.log(ocean_liquidated);
-  console.log("resulting ocean in contract");
-  console.log(ocean_locked - ocean_liquidated);
-
+ 
   // Get total votes, for ALL addresses, inside top 1000 pools, with a minimum of 0.0001 shares
-  const score = {};
-  const userAddresses: string[] = [];
   const return_score = {};
   if (graphResults && graphResults.pools) {
-    graphResults.pools.forEach((pool) => {
-      if (pool.holderCount > 0 && pool.active) {
-        pool.shares.map((share) => {
-          const userAddress = getAddress(share.userAddress.id);
-          if (!userAddresses.includes(userAddress))
-            userAddresses.push(userAddress);
-          if (!score[userAddress]) score[userAddress] = BigNumber.from(0);
-          let userShare =
-            share.balance * (pool.oceanReserve / pool.totalShares);
-          if (userShare > 0.0001) {
-            score[userAddress] = score[userAddress].add(
-              bdToBn(userShare.toString(), OCEAN_ERC20_DECIMALS)
-            );
-          }
-        });
-      }
-    });
 
     // We then sum total votes, per user address
     userAddresses.forEach((address) => {
